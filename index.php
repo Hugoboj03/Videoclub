@@ -26,15 +26,15 @@ echo "<h1>Bienvenido, $nombre</h1>";
 if ($tipo_usuario == 1) { // Trabajador
     echo "<h2>Panel de control: Trabajador</h2>";
     echo '<ul>
-        <li><a href="vista/gestionar_peliculas.php">Gestionar Películas</a></li>
-        <li><a href="vista/visualizar_clientes.php">Visualizar Clientes</a></li>
+        <li><a href="vista/gestionarPeliculas.php">Gestionar Películas</a></li>
+        <li><a href="vista/visualizarClientes.php">Visualizar Clientes</a></li>
     </ul>';
 } elseif ($tipo_usuario == 2) { // Cliente
     echo "<h2>Panel de control: Cliente</h2>";
     echo '<ul>
-        <li><a href="vista/listado_peliculas.php">Listado de Películas</a></li>
+        <li><a href="vista/listadoPeliculas.php">Listado de Películas</a></li>
         <li><a href="vista/historial.php">Historial</a></li>
-        <li><a href="vista/actualizar_perfil.php">Actualizar Perfil</a></li>
+        <li><a href="vista/actualizarPerfil.php">Actualizar Perfil</a></li>
     </ul>';
 }
 

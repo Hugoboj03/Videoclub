@@ -1,38 +1,42 @@
 <?php
+// Obtener el estado seleccionado (por defecto, "todos")
+if (isset($_GET['estado_id'])) {
+    $estado_id = $_GET['estado_id'];
+} else {
+    $estado_id = 'todos';
+}
 
-if (isset($_GET['id_categoria'])) {$id_categoria = $_GET['id_categoria'];} 
-else {$id_categoria = 'todas';}
+echo "<form action='gestionarPeliculas.php' method='get'>";
 
-
-echo "<form action='mostrar_noticias.php' method='get'>";
-
-//////////////////////////////////////////////////////////////////////////////////////////////////
-// Realizar la consulta
-
-$consulta = "SELECT id, nombre FROM categoria";
+// Realizar la consulta para obtener los estados
+$consulta = "SELECT id, nombre FROM estadospeliculas";
 $resultado = mysqli_query($conexion, $consulta);
 
 // Crear el desplegable
-echo "<select name='id_categoria'>";
+echo "<select name='estado_id'>";
 
-// Agregar la opción "Todas" al desplegable
-echo "<option value='todas'>Todas</option>";
+// Agregar la opción "Todos" al desplegable
+echo "<option value='todos'>Todos</option>";
 
-// Recorrer el conjunto de resultados
-while ($fila = mysqli_fetch_assoc($resultado)) 
-{
-
-
+// Recorrer los resultados de la consulta y agregar las opciones al desplegable
+while ($fila = mysqli_fetch_assoc($resultado)) {
     echo "<option value='$fila[id]'";
-    if ($fila['id'] == $id_categoria) echo " selected";
+
+    // Si el estado es el seleccionado, marcarlo como seleccionado
+    if ($fila['id'] == $estado_id) {
+        echo " selected";
+    }
+
     echo ">$fila[nombre]</option>";
-
-
 }
-// Cerrar el desplegables
+
+// Cerrar el desplegable
 echo "</select>";
 
-// Agregar el botón
-echo "<input type='submit' value='Enviar' name='enviar' />";?>
 
-</form>
+
+// Agregar el botón para enviar el formulario
+echo "<input type='submit' value='Filtrar' />";
+
+echo "</form>";
+?>
