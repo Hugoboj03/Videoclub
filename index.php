@@ -32,7 +32,7 @@ if ($tipo_usuario == 1) { // Trabajador
 } elseif ($tipo_usuario == 2) { // Cliente
     echo "<h2>Panel de control: Cliente</h2>";
     echo '<ul>
-        <li><a href="vista/listadoPeliculas.php">Listado de Películas</a></li>
+        <li><a href="vista/gestionarPeliculas.php">Listado de Películas</a></li>
         <li><a href="vista/historial.php">Historial</a></li>
         <li><a href="vista/actualizarPerfil.php">Actualizar Perfil</a></li>
     </ul>';

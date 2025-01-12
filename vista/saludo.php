@@ -7,7 +7,7 @@ $nombreUsuario = $_SESSION['nombre'];
 
 <head>
     <meta charset="UTF-8">
-    <title>Sistema de Gestión de Noticias</title>
+    <title>Sistema de Gestión de Peliculas</title>
     <style>
         body {
             margin: 0;
@@ -40,8 +40,8 @@ $nombreUsuario = $_SESSION['nombre'];
 
         <div>Bienvenido, <?php echo $nombreUsuario; ?>
 
-            <a href="modelo/cerrarSesionProceso.php">
-                <img src="img/salir.png" width="20" alt="Cerrar sesión">
-            </a>
+            <a href="../modelo/cerrarSesionProceso.php">
+                <img src="../img/salir.png" width="20" alt="Cerrar sesión">
+                </a>
         </div>
     </header>
