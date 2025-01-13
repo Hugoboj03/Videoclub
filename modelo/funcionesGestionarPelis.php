@@ -26,12 +26,17 @@ function registrarOperacion($conexion, $usuario_id, $pelicula_id) {
 function registrarHistorial($conexion, $usuario_id, $pelicula_id, $codigo_operacion, $fecha_devolucion) {
     $tipo_accion_id = 1; // 1 para alquiler
     $fecha_accion = date("Y-m-d H:i:s"); // Fecha y hora actual
-    $estado_devolucion_id = NULL; // No aplica aún en el alquiler
+
     
-    $consulta_historial = "INSERT INTO historial (usuario_id, pelicula_id, tipo_accion_id, fecha_accion, estado_devolucion_id, codigo_operacion, fecha_prevista_devolucion) 
+    
+    $estado_devolucion_id = NULL; // No aplica aún en el alquiler
+
+    
+    
+    $consulta_historial = "INSERT INTO historial (usuario_id, pelicula_id, tipo_accion_id, fecha_accion, fecha_prevista_devolucion ,estado_devolucion_id, codigo_operacion) 
                            VALUES (?, ?, ?, ?, ?, ?, ?)";
     $stmt = $conexion->prepare($consulta_historial);
-    $stmt->bind_param("iiissii", $usuario_id, $pelicula_id, $tipo_accion_id, $fecha_accion, $estado_devolucion_id, $codigo_operacion, $fecha_devolucion);
+    $stmt->bind_param("iiissii", $usuario_id, $pelicula_id, $tipo_accion_id, $fecha_accion, $fecha_devolucion, $estado_devolucion_id, $codigo_operacion, );
     return $stmt->execute();
 }
 

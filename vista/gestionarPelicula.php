@@ -88,7 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <title>Gestionar Película</title>
-    <link rel="stylesheet" type="text/css" href="../estilos/estilo.css">
+    <link rel="stylesheet" href="../estilos/estilo.css">
 </head>
 
 <body>
