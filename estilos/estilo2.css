@@ -6,13 +6,18 @@ body {
     justify-content: center;
     align-items: center;
 }
+
 header {
     background-color: #3498db;
     color: #fff;
     text-align: right;
     padding: 10px;
-    font-size: 14px; /* Tamaño de letra más pequeño */
+    font-size: 14px;
+    /* Tamaño de letra más pequeño */
 }
 
-H1 {font-size: 16pt; font-weight: bold; color: #0066CC;}
-
+H1 {
+    font-size: 16pt;
+    font-weight: bold;
+    color: #0066CC;
+}

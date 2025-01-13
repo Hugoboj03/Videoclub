@@ -13,7 +13,7 @@ include("saludo.php");
 <head>
     <meta charset="UTF-8">
     <title>Gestionar Películas</title>
-    <link rel="stylesheet" type="text/css" href="../estilos/estilo.css">
+    <link rel="stylesheet" href="../estilos/estilo.css">
 </head>
 
 <body>
