@@ -137,7 +137,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php elseif ($estado_pelicula == 3): // Alquilada 
         ?>
             <!-- Si la película está alquilada -->
-            <p>La película ya está alquilada y no puede ser alquilada nuevamente.</p>
+            <?php
+            // Consulta para obtener el cliente que tiene alquilada la película
+            $consulta_cliente = "SELECT usuarios.id AS usuario_id, usuarios.nombre AS nombre_cliente 
+                     FROM historial 
+                     INNER JOIN usuarios ON historial.usuario_id = usuarios.id 
+                     WHERE historial.pelicula_id = ? 
+                     AND historial.tipo_accion_id = 1 
+                     ORDER BY historial.fecha_accion DESC LIMIT 1";
+
+            $stmt = $conexion->prepare($consulta_cliente);
+            $stmt->bind_param("i", $id_pelicula);
+            $stmt->execute();
+            $resultado_cliente = $stmt->get_result();
+            $cliente_alquiler = $resultado_cliente->fetch_assoc();
+            ?>
+            <p>La película ya está alquilada por <a href="fichaCliente.php?id=<?php echo $cliente_alquiler['usuario_id']; ?>"><?php echo $cliente_alquiler['nombre_cliente'] ?></a></p>
+
 
         <?php else: ?>
             <p>Estado desconocido de la película.</p>
