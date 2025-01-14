@@ -27,7 +27,7 @@ if ($tipo_usuario == 1) { // Trabajador
     echo "<h2>Panel de control: Trabajador</h2>";
     echo '<ul>
         <li><a href="vista/gestionarPeliculas.php">Gestionar Películas</a></li>
-        <li><a href="vista/visualizarClientes.php">Visualizar Clientes</a></li>
+        <li><a href="vista/gestionarClientes.php">Visualizar Clientes</a></li>
     </ul>';
 } elseif ($tipo_usuario == 2) { // Cliente
     echo "<h2>Panel de control: Cliente</h2>";
