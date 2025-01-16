@@ -5,6 +5,8 @@ include("../modelo/sesion.php");
 include("../modelo/funcionesGestionarPelis.php");
 include("saludo.php");
 
+$nombreUsuario = $_SESSION['nombre'];
+
 // Verificar el tipo de usuario
 $tipo_usuario = $_SESSION['tipo_usuario']; // 1 = Trabajador, 2 = Cliente
 
@@ -64,7 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (registrarOperacion($conexion, $cliente_id, $pelicula_id)) {
                 // Registrar el historial de la acción
                 $codigo_operacion = $conexion->insert_id;  // El id de la operación insertada
-                if (registrarHistorial($conexion, $cliente_id, $pelicula_id, $codigo_operacion, $fecha_devolucion)) {
+                if (registrarHistorial($conexion, $cliente_id, $pelicula_id, $codigo_operacion, $fecha_devolucion, 1, 1)) {
                     echo "<p>Película alquilada correctamente.</p>";
                 } else {
                     echo "<p>Hubo un error al registrar el historial de la acción.</p>";
@@ -75,8 +77,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             echo "<p>Hubo un error al actualizar el estado de la película.</p>";
         }
+    } elseif (isset($_POST['reservar'])) {
+
+        $cliente = buscarCliente($conexion, $nombreUsuario);
+
+        // Verificar si la película está disponible
+        $consulta_estado = "SELECT estado_id FROM peliculas WHERE id = ?";
+        $stmt = $conexion->prepare($consulta_estado);
+        $stmt->bind_param("i", $pelicula_id);
+        $stmt->execute();
+        $resultado = $stmt->get_result();
+        $pelicula = $resultado->fetch_assoc();
+
+        //$cliente_id = $_POST['cliente_id']; // El id del cliente que reserva la película
+        $pelicula_id = $_POST['pelicula_id']; // El id de la película que se quiere reservar
+        $fecha_reserva = date('Y-m-d'); // Fecha actual
+
+        
+
+        // Cambiar el estado de la película a "Reservada" (estado_id 2)
+        if (actualizarEstadoPelicula($conexion, $pelicula_id, 2)) {  // 2 es el estado "Reservada"
+            // 1. Registrar la operación en la tabla Operaciones
+            if (registrarOperacion($conexion, $cliente["id"], $pelicula_id)) {
+                // 2. Registrar el historial con tipo_accion_id = 2
+                $codigo_operacion = $conexion->insert_id;
+                if (registrarHistorial($conexion, $cliente["id"], $pelicula_id, $codigo_operacion, null, 2, 1)) {
+                    echo "<p>Película reservada correctamente.</p>";
+                } else {
+                    echo "<p>Hubo un error al registrar el historial de la acción.</p>";
+                }
+            } else {
+                echo "<p>Hubo un error al registrar la operación de reserva.</p>";
+            }
+        } else {
+            echo "<p>Hubo un error al actualizar el estado de la película.</p>";
+        }
     } elseif (isset($_POST['no_disponible'])) {
-        // Marcar película como no disponible (sin insertar datos en la base de datos por ahora)
+
         echo "<p class='success'>La película ha sido marcada como no disponible (sin cambios en base de datos).</p>";
     }
 }
@@ -161,7 +198,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <?php elseif ($tipo_usuario == 2): // Vista para clientes 
     ?>
-        <p>No tienes permisos para gestionar películas.</p>
+        <form action="gestionarPelicula.php?id_pelicula=<?php echo $id_pelicula; ?>" method="post">
+            
+            <input type="hidden" name="pelicula_id" value="<?php echo $id_pelicula; ?>">
+
+
+            <input type="submit" name="reservar" value="Reservar">
+        </form>
     <?php else: ?>
         <p>Error: Tipo de usuario no reconocido.</p>
     <?php endif; ?>

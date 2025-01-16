@@ -109,8 +109,22 @@ include("saludo.php");
                         <td><?php echo $resultado['titulo']; ?></td>
                         <td><?php echo $resultado['genero']; ?></td>
                         <td><?php echo $resultado['anio']; ?></td>
+
                         <td><?php echo $resultado['estado']; ?></td>
-                        <td><a href="gestionarPelicula.php?id_pelicula=<?php echo $resultado['id']; ?>">Gestionar</a></td>
+
+
+                        <td>
+                            <?php
+
+                            if ($tipo_usuario == 2 && $resultado['estado'] != 'Disponible') {
+                                echo "";
+                            } else {
+                                echo "<a href='gestionarPelicula.php?id_pelicula=" . $resultado['id'] . "'>Gestionar</a>";
+                            }
+
+                            ?>
+
+                        </td>
                     </tr>
                 <?php
                 }

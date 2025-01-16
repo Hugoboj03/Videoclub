@@ -47,8 +47,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" )
     
 
     // Construir la consulta SQL con los datos escapados
-    $sql = "INSERT INTO usuarios(nombre, usuario, password, email) 
-    VALUES ('$nombre', '$usu', '$hashed_password', '$email')";
+    $sql = "INSERT INTO usuarios(nombre, usuario, contrasena, rol_id, email) 
+    VALUES ('$nombre', '$usu', '$hashed_password', 2, '$email')";
 
     // Ejecutar la consulta utilizando mysqli_query
     $resultado = mysqli_query($conexion, $sql);
