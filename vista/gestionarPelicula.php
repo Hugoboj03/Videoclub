@@ -7,6 +7,8 @@ include("saludo.php");
 
 $nombreUsuario = $_SESSION['nombre'];
 
+$mostrarReserva = true;
+
 // Verificar el tipo de usuario
 $tipo_usuario = $_SESSION['tipo_usuario']; // 1 = Trabajador, 2 = Cliente
 
@@ -93,7 +95,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $pelicula_id = $_POST['pelicula_id']; // El id de la película que se quiere reservar
         $fecha_reserva = date('Y-m-d'); // Fecha actual
 
-        
+
 
         // Cambiar el estado de la película a "Reservada" (estado_id 2)
         if (actualizarEstadoPelicula($conexion, $pelicula_id, 2)) {  // 2 es el estado "Reservada"
@@ -102,6 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // 2. Registrar el historial con tipo_accion_id = 2
                 $codigo_operacion = $conexion->insert_id;
                 if (registrarHistorial($conexion, $cliente["id"], $pelicula_id, $codigo_operacion, null, 2, 1)) {
+                    $mostrarReserva = false;
                     echo "<p>Película reservada correctamente.</p>";
                 } else {
                     echo "<p>Hubo un error al registrar el historial de la acción.</p>";
@@ -133,11 +136,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <p><a href='gestionarPeliculas.php'>Volver a la lista de películas</a></p>
 
     <?php if ($tipo_usuario == 1): // Vista para trabajadores 
-    ?>
+            ?>
         <!-- Mostrar diferentes formularios según el estado de la película -->
 
         <?php if ($estado_pelicula == 1): // Disponible 
-        ?>
+                    ?>
             <!-- Formulario si la película está disponible -->
             <form action="gestionarPelicula.php?id_pelicula=<?php echo $id_pelicula; ?>" method="post">
                 <label for="criterio">Buscar Cliente (ID o Nombre):</label><br>
@@ -167,12 +170,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <?php endif; ?>
 
         <?php elseif ($estado_pelicula == 2): // Reservada 
-        ?>
+                    ?>
+
+                    <form action="">
+                        <input type="date" name="fecha_alquilar" required><br>
+                        <input type="date" name="fecha_alquilar" required><br>
+                        <input type="submit" value="Alquilar Pelicula">
+                    </form>
             <!-- Si la película está reservada -->
             <p>La película está reservada y no puede ser alquilada en este momento.</p>
 
         <?php elseif ($estado_pelicula == 3): // Alquilada 
-        ?>
+                    ?>
             <!-- Si la película está alquilada -->
             <?php
             // Consulta para obtener el cliente que tiene alquilada la película
@@ -189,7 +198,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $resultado_cliente = $stmt->get_result();
             $cliente_alquiler = $resultado_cliente->fetch_assoc();
             ?>
-            <p>La película ya está alquilada por <a href="fichaCliente.php?id=<?php echo $cliente_alquiler['usuario_id']; ?>"><?php echo $cliente_alquiler['nombre_cliente'] ?></a></p>
+            <p>La película ya está alquilada por <a
+                    href="fichaCliente.php?id=<?php echo $cliente_alquiler['usuario_id']; ?>"><?php echo $cliente_alquiler['nombre_cliente'] ?></a>
+            </p>
 
 
         <?php else: ?>
@@ -197,14 +208,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php endif; ?>
 
     <?php elseif ($tipo_usuario == 2): // Vista para clientes 
-    ?>
-        <form action="gestionarPelicula.php?id_pelicula=<?php echo $id_pelicula; ?>" method="post">
-            
-            <input type="hidden" name="pelicula_id" value="<?php echo $id_pelicula; ?>">
+            ?>
 
 
-            <input type="submit" name="reservar" value="Reservar">
-        </form>
+        <?php if ($mostrarReserva == false): ?>
+
+            <p>Su pelicula fue reservada</p>
+
+
+        <?php else: ?>
+
+            <form action="gestionarPelicula.php?id_pelicula=<?php echo $id_pelicula; ?>" method="post">
+
+                <input type="hidden" name="pelicula_id" value="<?php echo $id_pelicula; ?>">
+
+
+                <input type="submit" name="reservar" value="Reservar">
+            </form>
+
+        <?php endif; ?>
+
+
+
     <?php else: ?>
         <p>Error: Tipo de usuario no reconocido.</p>
     <?php endif; ?>

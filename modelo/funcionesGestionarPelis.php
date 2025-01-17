@@ -49,13 +49,13 @@ function registrarOperacion($conexion, $usuario_id, $pelicula_id) {
 }
 
 function registrarHistorial($conexion, $usuario_id, $pelicula_id, $codigo_operacion, $fecha_devolucion, $tipo_accion_id, $estado_devolucion_id) {
-    $tipo_accion_id = 1; // 1 para alquiler
-    $estado_devolucion_id = 1; //1 para no devuelta
+    //$tipo_accion_id = 1; // 1 para alquiler
+    //$estado_devolucion_id = 1; //1 para no devuelta
     $fecha_accion = date("Y-m-d H:i:s"); // Fecha y hora actual
 
     
     
-    $estado_devolucion_id = NULL; // No aplica aún en el alquiler
+    //$estado_devolucion_id = NULL; // No aplica aún en el alquiler
 
     
     

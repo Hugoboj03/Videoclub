@@ -50,7 +50,8 @@ include("saludo.php");
     // Recorrer los resultados y agregar las opciones de estado
     while ($fila_estado = mysqli_fetch_assoc($resultado_estado)) {
         echo "<option value='$fila_estado[id]'";
-        if ($fila_estado['id'] == $estado_id) echo " selected"; // Seleccionar el estado previamente elegido
+        if ($fila_estado['id'] == $estado_id)
+            echo " selected"; // Seleccionar el estado previamente elegido
         echo ">$fila_estado[nombre]</option>";
     }
 
@@ -70,8 +71,7 @@ include("saludo.php");
     SELECT peliculas.id, peliculas.titulo, generos.nombre AS genero, peliculas.anio, estadospeliculas.nombre AS estado 
     FROM peliculas
     INNER JOIN generos ON peliculas.genero_id = generos.id
-    INNER JOIN estadospeliculas ON peliculas.estado_id = estadospeliculas.id
-";
+    INNER JOIN estadospeliculas ON peliculas.estado_id = estadospeliculas.id";
 
     // Condición de filtro por estado
     if ($estado_id != 'todos') {
@@ -84,7 +84,7 @@ include("saludo.php");
     }
 
     $instruccion .= " ORDER BY peliculas.titulo ASC"; // Ordenar por título
-
+    
     $consulta = mysqli_query($conexion, $instruccion);
 
     if ($consulta == FALSE) {
@@ -93,7 +93,7 @@ include("saludo.php");
         // Mostrar resultados de la consulta
         $nfilas = mysqli_num_rows($consulta);
         if ($nfilas > 0) {
-    ?>
+            ?>
             <table>
                 <tr>
                     <th>Título</th>
@@ -104,7 +104,7 @@ include("saludo.php");
                 </tr>
                 <?php
                 while ($resultado = mysqli_fetch_assoc($consulta)) {
-                ?>
+                    ?>
                     <tr>
                         <td><?php echo $resultado['titulo']; ?></td>
                         <td><?php echo $resultado['genero']; ?></td>
@@ -126,11 +126,11 @@ include("saludo.php");
 
                         </td>
                     </tr>
-                <?php
+                    <?php
                 }
                 ?>
             </table>
-    <?php
+            <?php
         } else {
             echo "No hay películas disponibles.";
         }
