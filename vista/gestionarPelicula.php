@@ -46,6 +46,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!$cliente_encontrado) {
             echo "<p class='error'>Cliente no encontrado. Intente de nuevo.</p>";
         }
+    } elseif (isset($_POST['cambiar_disponibilidad'])) {
+
+        $pelicula_id = $id_pelicula; // Obtenemos el ID de la película de la URL
+        $consulta_estado_actual = "SELECT estado_id FROM peliculas WHERE id = ?";
+        $stmt = $conexion->prepare($consulta_estado_actual);
+        $stmt->bind_param("i", $pelicula_id);
+        $stmt->execute();
+        $resultado_estado = $stmt->get_result();
+        $pelicula = $resultado_estado->fetch_assoc();
+
+        if ($pelicula) {
+            $estado_actual = $pelicula['estado_id'];
+
+            // Determinar el nuevo estado (1 = Disponible, 4 = No disponible)
+            $nuevo_estado = ($estado_actual == 1) ? 4 : 1;
+
+            // Actualizar el estado en la base de datos
+            $actualizar_estado = "UPDATE peliculas SET estado_id = ? WHERE id = ?";
+            $stmt = $conexion->prepare($actualizar_estado);
+            $stmt->bind_param("ii", $nuevo_estado, $pelicula_id);
+
+            if ($stmt->execute()) {
+                $mensaje = ($nuevo_estado == 1)
+                    ? "La película ahora está disponible."
+                    : "La película ahora está no disponible.";
+                echo "<p class='success'>$mensaje</p>";
+            } else {
+                echo "<p class='error'>Error al actualizar el estado de la película.</p>";
+            }
+        } else {
+            echo "<p class='error'>Película no encontrada.</p>";
+        }
     } elseif (isset($_POST['alquilar'])) {
         // Alquilar película
         $cliente_id = $_POST['cliente_id']; // El id del cliente que alquila la película
@@ -136,16 +168,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <p><a href='gestionarPeliculas.php'>Volver a la lista de películas</a></p>
 
     <?php if ($tipo_usuario == 1): // Vista para trabajadores 
-            ?>
+    ?>
         <!-- Mostrar diferentes formularios según el estado de la película -->
 
         <?php if ($estado_pelicula == 1): // Disponible 
-                    ?>
+        ?>
             <!-- Formulario si la película está disponible -->
             <form action="gestionarPelicula.php?id_pelicula=<?php echo $id_pelicula; ?>" method="post">
                 <label for="criterio">Buscar Cliente (ID o Nombre):</label><br>
                 <input type="text" name="criterio" required><br><br>
                 <input type="submit" name="buscar_cliente" value="Buscar Cliente">
+
+            </form>
+
+            <form action="gestionarPelicula.php?id_pelicula=<?php echo $id_pelicula; ?>" method="post">
+                <input type="submit" name="cambiar_disponibilidad" value="Cambiar Disponibilidad">
             </form>
 
             <?php if ($cliente_encontrado): ?>
@@ -170,18 +207,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <?php endif; ?>
 
         <?php elseif ($estado_pelicula == 2): // Reservada 
-                    ?>
+        ?>
 
-                    <form action="">
-                        <input type="date" name="fecha_alquilar" required><br>
-                        <input type="date" name="fecha_alquilar" required><br>
-                        <input type="submit" value="Alquilar Pelicula">
-                    </form>
+            <form action="">
+                <input type="date" name="fecha_alquilar" required><br>
+                <input type="date" name="fecha_alquilar" required><br>
+                <input type="submit" value="Alquilar Pelicula">
+            </form>
             <!-- Si la película está reservada -->
             <p>La película está reservada y no puede ser alquilada en este momento.</p>
 
         <?php elseif ($estado_pelicula == 3): // Alquilada 
-                    ?>
+        ?>
             <!-- Si la película está alquilada -->
             <?php
             // Consulta para obtener el cliente que tiene alquilada la película
@@ -202,13 +239,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     href="fichaCliente.php?id=<?php echo $cliente_alquiler['usuario_id']; ?>"><?php echo $cliente_alquiler['nombre_cliente'] ?></a>
             </p>
 
+        <?php elseif ($estado_pelicula == 4): // No Disponible 
+        ?>
+            <!-- Nuevo caso: Película no disponible -->
+            <p>La película está marcada como no disponible. Pulse el boton para cambiar su disponibilidad</p>
+
+            <form action="gestionarPelicula.php?id_pelicula=<?php echo $id_pelicula; ?>" method="post">
+                <input type="submit" name="cambiar_disponibilidad" value="Cambiar Disponibilidad">
+            </form>
+
+            
+
 
         <?php else: ?>
             <p>Estado desconocido de la película.</p>
         <?php endif; ?>
 
     <?php elseif ($tipo_usuario == 2): // Vista para clientes 
-            ?>
+    ?>
 
 
         <?php if ($mostrarReserva == false): ?>

@@ -1,6 +1,7 @@
 <?php
 include("../modelo/conexion.php");
 include("../modelo/sesion.php");
+include("../modelo/funcionesGestionarPelis.php");
 
 // Obtener el ID del cliente desde los parámetros GET
 $cliente_id = isset($_GET['id']) ? intval($_GET['id']) : null;
@@ -9,6 +10,52 @@ if (!$cliente_id) {
     echo "<p>Error: No se proporcionó un ID de cliente válido.</p>";
     exit;
 }
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirmar_devolucion'])) {
+    // Obtener los datos del formulario
+    $codigo_operacion = intval($_POST['codigo_operacion']);
+    $pelicula_id = intval($_POST['pelicula_id']);
+    $fecha_devolucion = $_POST['fecha_devolucion'];
+
+    if (empty($codigo_operacion) || empty($pelicula_id) || empty($fecha_devolucion)) {
+        echo "<p class='error'>Error: Todos los campos son obligatorios.</p>";
+    } else {
+        // 1. Actualizar el estado de la película a "Disponible" (estado_id = 1)
+        $consulta_estado = "UPDATE peliculas SET estado_id = 1 WHERE id = ?";
+        $stmt_estado = $conexion->prepare($consulta_estado);
+        $stmt_estado->bind_param("i", $pelicula_id);
+
+        if ($stmt_estado->execute()) {
+            // 2. Registrar la operación
+            $usuario_id = $cliente_id; // El ID del cliente actual
+            if (registrarOperacion($conexion, $usuario_id, $pelicula_id)) {
+                // 3. Determinar si la devolución es tardía o a tiempo
+                $estado_devolucion_id = (strtotime($fecha_devolucion) > strtotime($_POST['fecha_prevista_devolucion'])) ? 2 : 1;
+
+                // Registrar en el historial
+                if (registrarHistorial(
+                    $conexion,
+                    $usuario_id,
+                    $pelicula_id,
+                    $codigo_operacion,
+                    $fecha_devolucion,
+                    3, // Tipo de acción: Devolución
+                    $estado_devolucion_id
+                )) {
+                    echo "<p class='success'>Devolución registrada correctamente.</p>";
+                } else {
+                    echo "<p class='error'>Error al registrar el historial de devolución.</p>";
+                }
+            } else {
+                echo "<p class='error'>Error al registrar la operación.</p>";
+            }
+        } else {
+            echo "<p class='error'>Error al actualizar el estado de la película.</p>";
+        }
+    }
+}
+
+
 
 // Consultar información del cliente
 $consulta_cliente = "SELECT nombre, email FROM usuarios WHERE id = ?";
@@ -25,6 +72,7 @@ if (!$cliente) {
 
 // Consultar películas pendientes de devolución (alquiladas actualmente)
 $consulta_pendientes = "SELECT peliculas.titulo,
+                                peliculas.id AS pelicula_id, 
                                 historial.codigo_operacion, 
                                historial.fecha_accion AS fecha_alquiler, 
                                historial.fecha_prevista_devolucion,
@@ -101,6 +149,7 @@ $total_alquiladas = $resultado_total->fetch_assoc()['total_alquiladas'];
                 <th>Fecha Prevista de Devolución</th>
                 <th>Estado de Devolución</th>
                 <th>Tipo de Accion</th>
+                <th>Acciones</th>
             </tr>
             <?php while ($pelicula = $resultado_pendientes->fetch_assoc()): ?>
                 <tr>
@@ -108,12 +157,13 @@ $total_alquiladas = $resultado_total->fetch_assoc()['total_alquiladas'];
                     <td><?php echo $pelicula['codigo_operacion']; ?></td>
                     <td><?php echo $pelicula['fecha_alquiler']; ?></td>
                     <td><?php echo $pelicula['fecha_prevista_devolucion']; ?></td>
+
                     <td><?php
 
                         if ($pelicula['estado_devolucion'] == 1) {
                             echo "Pendiente";
                         } else {
-                            echo "";
+                            echo "Pendiente";
                         }
 
 
@@ -126,6 +176,16 @@ $total_alquiladas = $resultado_total->fetch_assoc()['total_alquiladas'];
                             echo "";
                         }
                         ?></td>
+                    <td>
+                        <form action="fichaCliente.php?id=<?php echo $cliente_id; ?>" method="post">
+                            <input type="hidden" name="codigo_operacion" value="<?php echo $pelicula['codigo_operacion']; ?>">
+                            <input type="hidden" name="pelicula_id" value="<?php echo $pelicula['pelicula_id']; ?>">
+                            <input type="hidden" name="fecha_prevista_devolucion" value="<?php echo $pelicula['fecha_prevista_devolucion']; ?>">
+                            <label>Fecha Devolución:</label>
+                            <input type="date" name="fecha_devolucion" required><br>
+                            <input type="submit" name="confirmar_devolucion" value="Confirmar Devolución">
+                        </form>
+                    </td>
 
                 </tr>
             <?php endwhile; ?>
