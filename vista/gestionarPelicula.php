@@ -248,7 +248,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <input type="submit" name="cambiar_disponibilidad" value="Cambiar Disponibilidad">
             </form>
 
-            
+
 
 
         <?php else: ?>

@@ -39,4 +39,3 @@ echo "</select>";
 echo "<input type='submit' value='Filtrar' />";
 
 echo "</form>";
-?>

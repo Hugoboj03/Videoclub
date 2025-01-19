@@ -42,6 +42,6 @@ $nombreUsuario = $_SESSION['nombre'];
 
             <a href="../modelo/cerrarSesionProceso.php">
                 <img src="../img/salir.png" width="20" alt="Cerrar sesión">
-                </a>
+            </a>
         </div>
     </header>

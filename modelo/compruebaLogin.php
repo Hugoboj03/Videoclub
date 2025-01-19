@@ -58,4 +58,3 @@ if (isset($_POST['enviar'])) {
         mysqli_close($conexion);
     }
 }
-?>

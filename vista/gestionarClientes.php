@@ -10,9 +10,9 @@ $query = "SELECT usuarios.id, usuarios.nombre, usuarios.email, usuarios.usuario,
                     WHERE historial.usuario_id = usuarios.id 
                       AND historial.tipo_accion_id = 1) AS total_alquiladas
             FROM usuarios;";
-        $stmt_select = $conexion->prepare($query);
-        $stmt_select->execute();
-        $stmt_select->bind_result($id, $nombre, $mail, $usuario, $total_alquiladas);
+$stmt_select = $conexion->prepare($query);
+$stmt_select->execute();
+$stmt_select->bind_result($id, $nombre, $mail, $usuario, $total_alquiladas);
 
 
 ?>
@@ -43,7 +43,7 @@ $query = "SELECT usuarios.id, usuarios.nombre, usuarios.email, usuarios.usuario,
         </tr>
         <?php
 
-        
+
 
 
 
@@ -56,7 +56,6 @@ $query = "SELECT usuarios.id, usuarios.nombre, usuarios.email, usuarios.usuario,
             echo "<td>$total_alquiladas</td>";
             echo "<td><a href='fichaCliente.php?id=$id'>Gestionar</a></td>";
             echo "</tr>";
-
         }
 
         ?>
