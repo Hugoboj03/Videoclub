@@ -9,13 +9,13 @@ $nombreUsuario = $_SESSION['nombre'];
 
 $mostrarReserva = true;
 
-// Verificar el tipo de usuario
-$tipo_usuario = $_SESSION['tipo_usuario']; // 1 = Trabajador, 2 = Cliente
+// Conprobar el tipo de usuario
+$tipo_usuario = $_SESSION['tipo_usuario']; 
 
-// Verificar que se haya proporcionado un ID válido de película
+// Coprobar que se haya proporcionado un ID válido de película
 $id_pelicula = isset($_GET['id_pelicula']) ? intval($_GET['id_pelicula']) : null;
 
-// Inicializar variables
+// Variables
 $cliente_encontrado = false;
 $cliente = null;
 
@@ -27,7 +27,7 @@ $stmt->execute();
 $resultado_estado = $stmt->get_result();
 $pelicula = $resultado_estado->fetch_assoc();
 
-// Verificar si se encontró la película
+// Comprobar si se encontró la película
 if ($pelicula) {
     $estado_pelicula = $pelicula['estado_id'];
 } else {
@@ -59,7 +59,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($pelicula) {
             $estado_actual = $pelicula['estado_id'];
 
-            // Determinar el nuevo estado (1 = Disponible, 4 = No disponible)
+            /**
+             * Comprobar nuevo estado
+             * 1 Disponible
+             * 4 No Disponible
+             * @var mixed
+             */
             $nuevo_estado = ($estado_actual == 1) ? 4 : 1;
 
             // Actualizar el estado en la base de datos
@@ -103,13 +108,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if (registrarHistorial($conexion, $cliente_id, $pelicula_id, $codigo_operacion, $fecha_devolucion, 1, 1)) {
                     echo "<p>Película alquilada correctamente.</p>";
                 } else {
-                    echo "<p>Hubo un error al registrar el historial de la acción.</p>";
+                    echo "Algo salio mal al registrar el historial de la acción.</p>";
                 }
             } else {
-                echo "<p>Hubo un error al registrar la operación de alquiler.</p>";
+                echo "<p>Algo salio mal al registrar la operación de alquiler.</p>";
             }
         } else {
-            echo "<p>Hubo un error al actualizar el estado de la película.</p>";
+            echo "<p>Algo salio mal actualizar el estado de la película.</p>";
         }
     } elseif (isset($_POST['reservar'])) {
 
@@ -123,9 +128,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $resultado = $stmt->get_result();
         $pelicula = $resultado->fetch_assoc();
 
-        //$cliente_id = $_POST['cliente_id']; // El id del cliente que reserva la película
-        $pelicula_id = $_POST['pelicula_id']; // El id de la película que se quiere reservar
-        $fecha_reserva = date('Y-m-d'); // Fecha actual
+        //$cliente_id = $_POST['cliente_id'];
+        $pelicula_id = $_POST['pelicula_id']; 
+        $fecha_reserva = date('Y-m-d'); 
 
 
 
@@ -167,13 +172,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <h1>Gestionar Película</h1>
     <p><a href='gestionarPeliculas.php'>Volver a la lista de películas</a></p>
 
-    <?php if ($tipo_usuario == 1): // Vista para trabajadores 
+    <!--Segun el tipo de usuario y estado de la pelicula se mostrara un formulario distinto en el html-->
+
+    <?php if ($tipo_usuario == 1): 
     ?>
-        <!-- Mostrar diferentes formularios según el estado de la película -->
+        
 
         <?php if ($estado_pelicula == 1): // Disponible 
         ?>
-            <!-- Formulario si la película está disponible -->
+            
             <form action="gestionarPelicula.php?id_pelicula=<?php echo $id_pelicula; ?>" method="post">
                 <label for="criterio">Buscar Cliente (ID o Nombre):</label><br>
                 <input type="text" name="criterio" required><br><br>
@@ -214,7 +221,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <input type="date" name="fecha_alquilar" required><br>
                 <input type="submit" value="Alquilar Pelicula">
             </form>
-            <!-- Si la película está reservada -->
+            
             <p>La película está reservada y no puede ser alquilada en este momento.</p>
 
         <?php elseif ($estado_pelicula == 3): // Alquilada 
