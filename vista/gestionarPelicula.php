@@ -10,7 +10,7 @@ $nombreUsuario = $_SESSION['nombre'];
 $mostrarReserva = true;
 
 // Conprobar el tipo de usuario
-$tipo_usuario = $_SESSION['tipo_usuario']; 
+$tipo_usuario = $_SESSION['tipo_usuario'];
 
 // Coprobar que se haya proporcionado un ID válido de película
 $id_pelicula = isset($_GET['id_pelicula']) ? intval($_GET['id_pelicula']) : null;
@@ -120,6 +120,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $cliente = buscarCliente($conexion, $nombreUsuario);
 
+        echo "hola";
+
         // Verificar si la película está disponible
         $consulta_estado = "SELECT estado_id FROM peliculas WHERE id = ?";
         $stmt = $conexion->prepare($consulta_estado);
@@ -129,8 +131,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $pelicula = $resultado->fetch_assoc();
 
         //$cliente_id = $_POST['cliente_id'];
-        $pelicula_id = $_POST['pelicula_id']; 
-        $fecha_reserva = date('Y-m-d'); 
+        $pelicula_id = $_POST['pelicula_id'];
+        $fecha_reserva = date('Y-m-d');
 
 
 
@@ -154,7 +156,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     } elseif (isset($_POST['no_disponible'])) {
 
-        echo "<p class='success'>La película ha sido marcada como no disponible (sin cambios en base de datos).</p>";
+        echo "<p class='success'>La pelicula no esta disponible.</p>";
+    } elseif (isset($_POST['alccli'])) {
+
+        //$cliente_id = $_POST['cliente_id']; // El id del cliente que alquila la película
+        $pelicula_id = $_POST['pelicula_id'];
+        //echo $cliente_id;
+        echo $pelicula_id;
+        $fecha_alquiler = isset($_POST['fecha_alquiler']) ? $_POST['fecha_alquiler'] : null;
+        $fecha_devolucion = isset($_POST['fecha_devolucion']) ? $_POST['fecha_devolucion'] : null;
+
+        $nombreUsuario = $_SESSION['nombre'];
+        $cliente = buscarCliente($conexion, $nombreUsuario);
+        $cliente_id = $cliente['id'];
+        echo $cliente_id;
+
+        if ($cliente_id && $pelicula_id && $fecha_alquiler && $fecha_devolucion) {
+            // Cambiar el estado de la película a "Alquilada" (estado_id = 3)
+            if (actualizarEstadoPelicula($conexion, $pelicula_id, 3)) {
+
+                //echo "1";
+                // Registrar la operación en la tabla de operaciones
+                if (registrarOperacion($conexion, $cliente_id, $pelicula_id)) {
+                    //echo "2";
+                    // Obtener el ID de la operación registrada
+                    $codigo_operacion = $conexion->insert_id;
+
+                    // Registrar el historial de la acción
+                    if (registrarHistorial($conexion, $cliente_id, $pelicula_id, $codigo_operacion, $fecha_devolucion, 1, 1)) {
+                        echo "<p>Película alquilada correctamente.</p>";
+                    } else {
+                        echo "<p>Error al registrar el historial de la acción.</p>";
+                    }
+                } else {
+                    echo "<p>Error al registrar la operación de alquiler.</p>";
+                }
+            } else {
+                echo "<p>Error al actualizar el estado de la película.</p>";
+            }
+        } else {
+            echo "<p>Por favor, complete todos los campos del formulario.</p>";
+        }
     }
 }
 ?>
@@ -174,13 +216,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <!--Segun el tipo de usuario y estado de la pelicula se mostrara un formulario distinto en el html-->
 
-    <?php if ($tipo_usuario == 1): 
+    <?php if ($tipo_usuario == 1):
     ?>
-        
+
 
         <?php if ($estado_pelicula == 1): // Disponible 
         ?>
-            
+
             <form action="gestionarPelicula.php?id_pelicula=<?php echo $id_pelicula; ?>" method="post">
                 <label for="criterio">Buscar Cliente (ID o Nombre):</label><br>
                 <input type="text" name="criterio" required><br><br>
@@ -197,7 +239,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <p>Nombre: <?php echo $cliente['nombre']; ?></p>
                 <p>ID: <?php echo $cliente['id']; ?></p>
 
-                <!-- Formulario para alquilar o marcar como no disponible -->
+                <!-- Formulario para alquilar -->
                 <form action="gestionarPelicula.php?id_pelicula=<?php echo $id_pelicula; ?>" method="post">
                     <input type="hidden" name="cliente_id" value="<?php echo $cliente['id']; ?>">
                     <input type="hidden" name="pelicula_id" value="<?php echo $id_pelicula; ?>">
@@ -209,20 +251,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <input type="date" name="fecha_devolucion" required><br><br>
 
                     <input type="submit" name="alquilar" value="Alquilar">
-                    <input type="submit" name="no_disponible" value="No Disponible">
+
                 </form>
             <?php endif; ?>
 
         <?php elseif ($estado_pelicula == 2): // Reservada 
         ?>
 
-            <form action="">
-                <input type="date" name="fecha_alquilar" required><br>
-                <input type="date" name="fecha_alquilar" required><br>
-                <input type="submit" value="Alquilar Pelicula">
+            <form action="gestionarPelicula.php?id_pelicula=<?php echo $id_pelicula; ?>" method="post">
+
+                <input type="hidden" name="pelicula_id" value="<?php echo $id_pelicula; ?>">
+                <input type="date" name="fecha_alquiler" required><br>
+                <input type="date" name="fecha_devolucion" required><br>
+                <input type="submit" name="alccli" value="Alquilar Pelicula al Cliente">
             </form>
-            
-            <p>La película está reservada y no puede ser alquilada en este momento.</p>
+
+
 
         <?php elseif ($estado_pelicula == 3): // Alquilada 
         ?>
